@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.css-knqc4i-MuiDialogActions-root
+{
+    display: none !important;
+}
+
