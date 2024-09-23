@@ -13,7 +13,6 @@ const Register = () => {
   const { userdata, updateData, handleNameChange } = useContext(userContext);
   const { displayPopup } = useContext(PopupContext);
   const navigate = useNavigate()
-
   const encrypt = (text, shift) => {
     return text.split('').map(char => {
         const charCode = char.charCodeAt(0);
@@ -110,8 +109,15 @@ const Register = () => {
               name="name"
               type="text"
               placeholder="Name"
-              className="flex items-center justify-center w-full bg-white rounded-full my-4 px-3 py-2"
+              className="flex items-center justify-center w-full bg-white rounded-full my-3 px-3 py-2"
               onChange={handleNameChange}
+            />
+            <input
+              name="role"
+              type="text"
+              placeholder="Patient/Doctor"
+              className="flex items-center justify-center w-full bg-white rounded-full my-3 px-3 py-2"
+              onChange={(e)=>updateData({...userdata,[e.target.name]:e.target.value})}
             />
             <div className="w-full flex flex-col items-center">
               <input
@@ -131,7 +137,7 @@ const Register = () => {
               name="password"
               type="password"
               placeholder="Password"
-              className="flex items-center justify-center w-full bg-white rounded-full my-4 px-3 py-2 "
+              className="flex items-center justify-center w-full bg-white rounded-full my-2 px-3 py-2 "
               onChange={(e) =>
                 updateData({ ...userdata, [e.target.name]: e.target.value })
               }

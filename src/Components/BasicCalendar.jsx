@@ -100,7 +100,11 @@ const BasicCalendar = ({ type }) => {
             <p className='text-xl text-violet-500 font-semibold'>Title:</p>
             <input name='title' ref={titleRef} type='text' value={eventData.title} onChange={handleChange} className='text-black w-6/12 my-3 border-2 p-2 border-violet-700 outline-violet-700 h-10 text-lg'></input>
           </div>
-          <div className='flex gap-5 justify-between items-center pl-3'>
+          <div className={type === 'medications' ? 'flex gap-5 justify-between items-center pl-3':'hidden'}>
+            <p className='text-xl text-violet-500 font-semibold'>Medicine Name:</p>
+            <input name='hospitalName' type='text' value={eventData.hospitalName} onChange={handleChange} className='text-black w-6/12 my-3 border-2 p-2 border-violet-700 outline-violet-700 h-10 text-lg'></input>
+          </div>
+          <div className={type==='appointments' ? 'flex gap-5 justify-between items-center pl-3':'hidden'}>
             <p className='text-xl text-violet-500 font-semibold'>Hospital Name:</p>
             <input name='hospitalName' type='text' value={eventData.hospitalName} onChange={handleChange} className='text-black w-6/12 my-3 border-2 p-2 border-violet-700 outline-violet-700 h-10 text-lg'></input>
           </div>
@@ -112,7 +116,7 @@ const BasicCalendar = ({ type }) => {
             <p className='text-xl text-violet-500 font-semibold'>Instructions:</p>
             <input name='instructions' type='text' value={eventData.instructions} onChange={handleChange} className='text-black w-6/12 my-3 border-2 p-2 border-violet-700 outline-violet-700 h-10 text-lg'></input>
           </div>
-          <div className='flex gap-36 items-center pl-3 mb-5'>
+          <div className={type==='appointments' ? 'flex gap-36 items-center pl-3 mb-5' : 'hidden'}>
             <p className='text-xl text-violet-500 font-semibold'>Confirmed:</p>
             <input name='confirmed' type='checkbox' checked={eventData.confirmed} onChange={handleCheckboxChange} className='h-6 w-6'></input>
           </div>

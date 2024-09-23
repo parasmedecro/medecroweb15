@@ -29,6 +29,11 @@ const NavBar = () => {
       title: "Analytics",
       icon: <i className="fa-solid fa-chart-line" />,
       route: "/Analytics",
+    },
+    {
+      title:"Sick Check",
+      icon:<i class="fa-solid fa-magnifying-glass"/>,
+      route:"/SickCheck"
     }
   ];
 
@@ -71,7 +76,7 @@ const NavBar = () => {
             </div>
           </div>
         </div>
-        <div className="mt-48 flex justify-center items-center rounded-xl py-5 ml-5 hover:bg-violet-300" onClick={LogOutHandler}>
+        <div className="mt-24 flex justify-center items-center rounded-xl py-5 ml-3 hover:bg-violet-300" onClick={LogOutHandler}>
           <i className="fa-solid fa-right-from-bracket"></i>
           <p className="pl-3 font-semibold">LogOut</p>
         </div>

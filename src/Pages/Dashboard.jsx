@@ -12,6 +12,7 @@ import { PickersDay } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import PushPinIcon from '@mui/icons-material/PushPin';
 import { Link } from "react-router-dom";
+import profilepic from "../Resources/Designer.png"
 
 const DashBoard = () => {
   const { Appointment } = useContext(ScheduleContext);
@@ -122,7 +123,7 @@ const DashBoard = () => {
             <Link to="/Profile">
               <img
                 className="rounded-full w-14 hover:scale-110"
-                src="https://th.bing.com/th/id/OIG3.yqL0ZX6lhjYsggUxMId1?w=270&h=270&c=6&r=0&o=5&dpr=1.3&pid=ImgGn"
+                src={profilepic}
               ></img>
             </Link>
           </div>

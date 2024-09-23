@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { userContext } from "../Context/UserContext";
 import { useEffect } from "react";
+import profilepic from "../Resources/Designer.png"
 
 function InputField({ name, label, value, onChange, placeholder }) {
   return (
@@ -55,9 +56,9 @@ const GeneralInfo = () => {
 
           />
           <img
-            className="absolute z-10 top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-36 h-36 border-2 border-white rounded-full mt-5 hover:scale-110"
+            className="absolute z-10 top-2/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-36 h-36 border-8 border-white rounded-full mt-5 hover:scale-110"
             alt="React"
-            src="https://th.bing.com/th/id/OIG3.yqL0ZX6lhjYsggUxMId1?w=270&h=270&c=6&r=0&o=5&dpr=1.3&pid=ImgGn"
+            src={profilepic}
             onError={(e) => {
               e.target.onerror = null;
               e.target.src =

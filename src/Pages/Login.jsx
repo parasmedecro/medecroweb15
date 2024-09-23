@@ -33,11 +33,21 @@ const Login = () => {
       return;
     }
     if (userdata.email === loginemail) {
+      console.log(userdata.password)
       if (decrypt(userdata.password,3) === loginpass) {
         displayPopup("Login Successful", "correct");
-        setTimeout(() => {
-          navigate('/dashBoard')
-        }, 1000);
+        if(userdata.role=="Patient")
+        {
+          setTimeout(() => {
+            navigate('/dashBoard')
+          }, 1000);
+        }
+        else
+        {
+          setTimeout(() => {
+            navigate('/DocDashboard')
+          }, 1000);
+        }
       } else {
         displayPopup("Invalid Password", "wrong");
       }

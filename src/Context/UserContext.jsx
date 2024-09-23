@@ -3,11 +3,21 @@ import { createContext, useEffect, useState } from "react";
 export const userContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
+  const encrypt = (text, shift) => {
+    return text.split('').map(char => {
+        const charCode = char.charCodeAt(0);
+        const shiftedCharCode = (charCode + shift) % 256;
+        return String.fromCharCode(shiftedCharCode);
+    }).join('');
+  }
+
+
   const [userdata, setuserdata] = useState({
-    name: "",
-    email: "",
-    password: "",
+    name: "Dummy Patient",
+    email: "dummy@gmail.com",
+    password: encrypt("123456A",3),
     userId:'sath7277',
+    role:'patient',
     bloodType:'AB+',
     dob:"2004-10-24",
     number:"9087079062",
@@ -21,6 +31,7 @@ export const UserContextProvider = ({ children }) => {
   const updateData = (newData) => {
     setuserdata({...newData });
   };
+
 
   const generateRandomNumber = () => {
     const randomNumber = Math.floor(10000 + Math.random() * 90000);

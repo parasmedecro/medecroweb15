@@ -4,8 +4,7 @@ import { ScheduleContext } from '../Context/ScheduleContext';
 const EventTable = ({ type }) => {
   const { Appointment, medications } = useContext(ScheduleContext);
   const events = type === 'appointments' ? Appointment : medications;
-
-  // Add a guard clause to handle the case where events is undefined
+  
   if (!events) {
     return null;
   }

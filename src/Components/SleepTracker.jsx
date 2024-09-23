@@ -5,7 +5,7 @@ const SleepTracker = () => {
   const generateRandomSleepData = (count) => {
     let normalSleepData = [];
     let deepSleepData = [];
-    let baseTime = new Date('2024-04-29T00:00:00').getTime(); // Start from today
+    let baseTime = new Date('2024-09-09T00:00:00').getTime(); // Start from today
 
     for (let i = 0; i < count; i++) {
       let sleepStart = baseTime + Math.floor(Math.random() * 12) * 2; // Random sleep start time within a 12-hour window
