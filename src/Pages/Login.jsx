@@ -7,7 +7,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import axios from 'axios';
 
 const Login = () => {
-  const { userdata } = useContext(userContext);
+  const { userdata,updateData } = useContext(userContext);
   const [loginemail, setloginemail] = useState("");
   const [loginpass, setpass] = useState("");
   const { displayPopup } = useContext(PopupContext);
@@ -18,25 +18,21 @@ const Login = () => {
     console.log("Stored data",storeddata)
   }, []);
 
-  const decrypt = (text, shift) => {
-    return text.split('').map(char => {
-        const charCode = char.charCodeAt(0);
-        const shiftedCharCode = (charCode - shift) % 256;
-        return String.fromCharCode(shiftedCharCode);
-    }).join('');
-  }
+
 
   const ClickHandler = () => {
-    if(userdata.email==="")
+    if(loginemail==="")
     {
       displayPopup("Enter Email", "wrong");
       return;
     }
-    if (userdata.email === loginemail) {
-      console.log(userdata.password)
-      if (decrypt(userdata.password,3) === loginpass) {
+    axios.post("http://localhost:5000/api/users/login",{email:loginemail,password:loginpass})
+    .then((res)=>
+    {
+      if (res.status==200) {
+        updateData(res.data)
         displayPopup("Login Successful", "correct");
-        if(userdata.role=="Patient")
+        if(userdata.role=="Patient" || userdata.role=="patient")
         {
           setTimeout(() => {
             navigate('/dashBoard')
@@ -51,9 +47,12 @@ const Login = () => {
       } else {
         displayPopup("Invalid Password", "wrong");
       }
-    } else {
-      displayPopup("Invalid Email Id", "wrong");
-    }
+
+    })
+    .catch((error)=>
+    {
+      console.log("Error Message from API Call",error.message)
+    })
   };
 
 
@@ -70,9 +69,17 @@ const Login = () => {
           response.data.email === userdata.email
         ) {
           displayPopup("Google Login Successful", "correct");
-          setTimeout(() => {
-            navigate("/dashBoard")
-          }, 1000);
+          if(userdata.role=='Patient' || userdata.role=="patient")
+          {
+            setTimeout(() => {
+              navigate("/dashBoard")
+            }, 1000);
+          }
+          else{
+            setTimeout(() => {
+              navigate("/DocdashBoard")
+            }, 1000);
+          }
         }
         else
         {

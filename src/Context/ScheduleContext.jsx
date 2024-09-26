@@ -6,8 +6,8 @@ export const ScheduleContextProvider = ({ children }) => {
   const defaultEvents = [
     {
       title: "Dentist Appointment",
-      start: new Date(2024, 8, 25, 10, 0),
-      end: new Date(2024, 8, 25, 11, 0),
+      start: new Date(2024, 9, 26, 10, 0),
+      end: new Date(2024, 9, 26, 11, 0),
       hospitalName: "Dental Clinic",
       confirmed: true
     },
@@ -30,22 +30,22 @@ export const ScheduleContextProvider = ({ children }) => {
   const defaultMedications = [
     {
       title: "Aspirin",
-      start: new Date(2024, 8, 20, 8, 0),
-      end: new Date(2024, 8, 24, 8, 0),
+      start: new Date(2024, 9, 20, 8, 0),
+      end: new Date(2024, 9, 28, 8, 0),
       dosage: "500mg",
       instructions: "Take 1 tablet after lunch"
     },
     {
       title: "Antibiotic",
-      start: new Date(2024, 8, 20, 9, 0),
-      end: new Date(2024, 8, 24, 9, 0),
+      start: new Date(2024, 9, 20, 9, 0),
+      end: new Date(2024, 9, 28, 9, 0),
       dosage: "250mg",
       instructions: "Take 1 capsule in the morning"
     },
     {
       title: "Vitamin C",
-      start: new Date(2024, 8, 20, 14, 0),
-      end: new Date(2024, 8, 24, 14, 0),
+      start: new Date(2024, 9, 20, 14, 0),
+      end: new Date(2024, 9, 28, 14, 0),
       dosage: "200mg",
       instructions: "Take 1 tablet after lunch"
     }

@@ -25,10 +25,9 @@ const Layout = () => {
   const isNavbarVisible = !['/', '/Login', '/Register'].includes(location.pathname);
   const { showPopup } = useContext(PopupContext);
   const {userdata} = useContext(userContext);
-
   return (
-    <div className={(userdata.role==='patient' || userdata.role==='Patient')?"flex w-full h-screen bg-violet-200":"flex w-full h-screen bg-blue-200"} style={{ fontFamily: "Poppins" }}>
-      {isNavbarVisible && ((userdata.role==='patient' || userdata.role==='Patient')?<NavBar/>:<NavBar2/>)}
+    <div className={(userdata.role=='patient' || userdata.role=='Patient')?"flex w-full h-screen bg-violet-200":"flex w-full h-screen bg-blue-200"} style={{ fontFamily: "Poppins" }}>
+      {isNavbarVisible && ((userdata.role=='patient' || userdata.role=='Patient')?<NavBar/>:<NavBar2/>)}
       <Outlet />
       <Routes>
         <Route path="/" element={<Login />} />

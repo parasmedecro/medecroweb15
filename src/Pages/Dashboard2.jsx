@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { userContext } from "../Context/UserContext";
 import { Link } from "react-router-dom";
 import profilepic from "../Resources/surgeon-doctor.svg"
@@ -6,7 +6,7 @@ import ClinicalEarnings from "../Components/Earnings";
 import Small_Count from "../Components/Small_Count";
 
 const DashBoard2 = () => {
-  const { userdata, updateData } = useContext(userContext);
+  const { userdata } = useContext(userContext);
 
   return (
     <div

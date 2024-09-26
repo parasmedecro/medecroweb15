@@ -33,7 +33,6 @@ const Prescribe = () => {
 
   const [drugs, setDrugs] = useState([{ name: "", strength: "", quantity: "", frequency: "", pricePerUnit: "" }]);
 
-  // New state variables for billing
   const [doctorFee, setDoctorFee] = useState("");
   const [gstRate] = useState(18);
 

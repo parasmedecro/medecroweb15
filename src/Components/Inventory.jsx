@@ -1,26 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, Button, Typography, Dialog, DialogContent, DialogTitle, TextField, Menu, MenuItem, InputAdornment } from '@mui/material';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import SearchIcon from '@mui/icons-material/Search';
-
-const initialMedicines = [
-  { id: 1, name: 'Aspirin', price: 500, status: 'Available', inStock: 30, measure: 'mg' },
-  { id: 2, name: 'Paracetamol', price: 700, status: 'Out of Stock', inStock: 0, measure: 'mg' },
-  { id: 3, name: 'Ibuprofen', price: 450, status: 'Available', inStock: 50, measure: 'mg' },
-  { id: 4, name: 'Cough Syrup', price: 1200, status: 'Available', inStock: 20, measure: 'ml' },
-  { id: 5, name: 'Amoxicillin', price: 950, status: 'Out of Stock', inStock: 0, measure: 'mg' },
-];
+import axios from 'axios';
 
 const InventoryTable = () => {
-  const [medicines, setMedicines] = useState(initialMedicines);
+  const [medicines, setMedicines] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [newMedicine, setNewMedicine] = useState({ id: '', name: '', price: '', status: 'Available', inStock: '', measure: '' });
+  const [newMedicine, setNewMedicine] = useState({ _id: '', name: '', price: '', status: 'Available', inStock: '', measure: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRowId, setSelectedRowId] = useState(null);
+  
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/inventory/get')
+      .then((res) => {
+        setMedicines(res.data); 
+      })
+      .catch((error) => {
+        console.error('Error fetching medicines:', error);
+      });
+  }, []);
 
   const columns = [
     { field: 'name', headerName: 'Name', flex: 1 },
@@ -41,12 +44,12 @@ const InventoryTable = () => {
       flex: 1,
       renderCell: (params) => (
         <>
-          <Button variant="contained" color="primary" onClick={(event) => handleMenuOpen(event, params.row.id)}>
+          <Button variant="contained" color="primary" onClick={(event) => handleMenuOpen(event, params.row._id)}>
             Options
           </Button>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl && selectedRowId === params.row.id)} onClose={handleMenuClose}>
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl && selectedRowId === params.row._id)} onClose={handleMenuClose}>
             <MenuItem onClick={() => handleEdit(params.row)}>Edit</MenuItem>
-            <MenuItem onClick={() => handleDelete(params.row.id)}>Delete</MenuItem>
+            <MenuItem onClick={() => handleDelete(params.row._id)}>Delete</MenuItem>
           </Menu>
         </>
       ),
@@ -76,9 +79,20 @@ const InventoryTable = () => {
   const handleClose = () => setOpen(false);
 
   const handleAddMedicine = () => {
-    setMedicines([...medicines, { ...newMedicine, id: medicines.length + 1 }]);
-    resetMedicine();
-    handleClose();
+    console.log(newMedicine)
+    axios.post('http://localhost:5000/api/inventory/add',{data:newMedicine})
+    .then((res)=>
+    {
+      if(res.status==200)
+      {
+        setMedicines([...medicines, { ...newMedicine, _id: `id_${medicines.length + 1}` }]);
+        resetMedicine();
+        handleClose();
+      }else
+      {
+        console.log("Medicine Not added")
+      }
+    })
   };
 
   const handleEdit = (row) => {
@@ -88,20 +102,20 @@ const InventoryTable = () => {
   };
 
   const handleDelete = (id) => {
-    setMedicines(medicines.filter((medicine) => medicine.id !== id));
+    setMedicines(medicines.filter((medicine) => medicine._id !== id));
     handleMenuClose();
   };
 
   const handleEditClose = () => setEditOpen(false);
 
   const handleUpdateMedicine = () => {
-    setMedicines(medicines.map((med) => (med.id === newMedicine.id ? { ...newMedicine } : med)));
+    setMedicines(medicines.map((med) => (med._id === newMedicine._id ? { ...newMedicine } : med)));
     resetMedicine();
     handleEditClose();
   };
 
   const resetMedicine = () => {
-    setNewMedicine({ id: '', name: '', price: '', status: 'Available', inStock: '', measure: '' });
+    setNewMedicine({ _id: '', name: '', price: '', status: 'Available', inStock: '', measure: '' });
   };
 
   const filteredMedicines = medicines.filter((medicine) =>
@@ -173,6 +187,7 @@ const InventoryTable = () => {
           pageSize={5}
           rowsPerPageOptions={[5]}
           disableSelectionOnClick
+          getRowId={(row) => row._id} 
           sx={{
             height: "80%",
             "& .MuiDataGrid-columnHeaders": {
@@ -205,9 +220,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.name}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, name: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, name: e.target.value })}
             />
             <TextField
               margin="dense"
@@ -216,9 +229,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.price}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, price: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, price: e.target.value })}
             />
             <TextField
               margin="dense"
@@ -227,9 +238,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.inStock}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, inStock: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, inStock: e.target.value })}
             />
             <TextField
               margin="dense"
@@ -238,9 +247,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.measure}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, measure: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, measure: e.target.value })}
             />
             <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
               <Button onClick={handleClose} sx={{ mr: 1 }}>
@@ -269,9 +276,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.name}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, name: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, name: e.target.value })}
             />
             <TextField
               margin="dense"
@@ -280,9 +285,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.price}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, price: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, price: e.target.value })}
             />
             <TextField
               margin="dense"
@@ -291,9 +294,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.inStock}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, inStock: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, inStock: e.target.value })}
             />
             <TextField
               margin="dense"
@@ -302,9 +303,7 @@ const InventoryTable = () => {
               fullWidth
               variant="standard"
               value={newMedicine.measure}
-              onChange={(e) =>
-                setNewMedicine({ ...newMedicine, measure: e.target.value })
-              }
+              onChange={(e) => setNewMedicine({ ...newMedicine, measure: e.target.value })}
             />
             <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
               <Button onClick={handleEditClose} sx={{ mr: 1 }}>

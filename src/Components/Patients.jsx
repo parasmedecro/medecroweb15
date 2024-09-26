@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, Button, Typography, Dialog, DialogContent, DialogTitle, TextField, InputAdornment, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Button, Typography, Dialog, DialogContent, DialogTitle, TextField, InputAdornment, Accordion, AccordionSummary, AccordionDetails, Table, TableHead, TableRow, TableCell, TableBody, MenuItem, FormControl, Select } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 
@@ -18,12 +18,19 @@ const initialPatientDetails = {
       { date: '2024-09-01', problem: 'Fever', bill: 500 },
       { date: '2024-09-10', problem: 'Cough', bill: 300 },
     ],
+    testReports: [
+      { id: 1, date: '2024-09-01', test: 'Blood Test', result: 'Hemoglobin: 13g/dL, WBC: 5.5k/uL' },
+      { id: 2, date: '2024-09-05', test: 'X-Ray', result: 'Normal' },
+    ],
   },
   2: {
     medicines: ['Paracetamol 500mg'],
     prescription: 'Take 1 tablet for headache.',
     visits: [
       { date: '2024-09-05', problem: 'Headache', bill: 200 },
+    ],
+    testReports: [
+      { id: 1, date: '2024-09-06', test: 'CT Scan', result: 'No Abnormalities' },
     ],
   },
   3: {
@@ -32,6 +39,7 @@ const initialPatientDetails = {
     visits: [
       { date: '2024-09-15', problem: 'Back Pain', bill: 400 },
     ],
+    testReports: [],
   },
 };
 
@@ -41,6 +49,7 @@ const PatientTable = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [testReportOpen, setTestReportOpen] = useState(false);
   const [addPatientOpen, setAddPatientOpen] = useState(false);
   const [newPatient, setNewPatient] = useState({
     name: '',
@@ -48,10 +57,19 @@ const PatientTable = () => {
     age: '',
     bloodGroup: '',
     nextAppointment: '',
+    dob: '',
+    phoneNumber: '',
   });
 
   const [newVisit, setNewVisit] = useState({ date: '', problem: '', bill: '' });
   const [newPrescription, setNewPrescription] = useState({ medicines: '', prescription: '' });
+
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const ageDiff = Date.now() - birthDate.getTime();
+    const ageDate = new Date(ageDiff);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
 
   const columns = [
     { field: 'name', headerName: 'Name', flex: 1 },
@@ -59,6 +77,17 @@ const PatientTable = () => {
     { field: 'age', headerName: 'Age', flex: 1 },
     { field: 'bloodGroup', headerName: 'Blood Group', flex: 1 },
     { field: 'nextAppointment', headerName: 'Next Appointment', flex: 1 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      renderCell: (params) => (
+        <>
+          <Button variant="outlined" onClick={() => handleEditPatient(params.row)}>Edit</Button>
+          <Button variant="outlined" onClick={() => handleDeletePatient(params.row.id)} sx={{ ml: 1 }}>Delete</Button>
+        </>
+      ),
+      flex: 1,
+    },
   ];
 
   const handleRowClick = (params) => {
@@ -76,17 +105,22 @@ const PatientTable = () => {
 
   const handleAddPatient = () => {
     const newPatientId = patients.length + 1;
+    const age = calculateAge(newPatient.dob); 
+    if (newPatient.phoneNumber.length !== 10) {
+      alert("Phone number must be 10 digits");
+      return;
+    }
     setPatients([
       ...patients,
-      { ...newPatient, id: newPatientId },
+      { ...newPatient, id: newPatientId, age },
     ]);
-    // Initialize empty details for new patient
     setPatientDetails({
       ...patientDetails,
       [newPatientId]: {
         medicines: [],
         prescription: '',
         visits: [],
+        testReports: [],
       },
     });
     setNewPatient({
@@ -95,6 +129,8 @@ const PatientTable = () => {
       age: '',
       bloodGroup: '',
       nextAppointment: '',
+      dob: '',
+      phoneNumber: '',
     });
     handleAddPatientClose();
   };
@@ -127,6 +163,21 @@ const PatientTable = () => {
     setNewPrescription({ medicines: '', prescription: '' });
   };
 
+  const handleTestReportOpen = () => setTestReportOpen(true); // Open test reports dialog
+  const handleTestReportClose = () => setTestReportOpen(false); // Close test reports dialog
+
+  const handleEditPatient = (patient) => {
+    setNewPatient({ ...patient, dob: '' });
+    handleAddPatientOpen();
+  };
+
+  const handleDeletePatient = (id) => {
+    setPatients(patients.filter(patient => patient.id !== id));
+    const updatedDetails = { ...patientDetails };
+    delete updatedDetails[id];
+    setPatientDetails(updatedDetails);
+  };
+
   const filteredPatients = patients.filter((patient) =>
     patient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -134,7 +185,7 @@ const PatientTable = () => {
   return (
     <Box
       sx={{
-        height: '100%',
+        height: '100vh',
         width: '100%',
         bgcolor: '#BFDBFE',
         display: 'flex',
@@ -145,7 +196,7 @@ const PatientTable = () => {
     >
       <Box sx={{ height: 'auto', width: '80%', bgcolor: '#FFFFFF', p: 3, borderRadius: 2, boxShadow: 3 }}>
         <Typography variant="h4" gutterBottom sx={{ color: '#0288D1', mb: 3 }}>
-          Patient Appointment Management
+          Patient Management
         </Typography>
 
         {/* Search bar */}
@@ -166,7 +217,6 @@ const PatientTable = () => {
           />
         </Box>
 
-        
         <Button
           variant="contained"
           sx={{ mb: 2, backgroundColor: '#4CAF50', color: '#FFFFFF' }}
@@ -176,198 +226,213 @@ const PatientTable = () => {
         </Button>
 
         <DataGrid
-          rows={filteredPatients}
-          columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
-          disableSelectionOnClick
-          onRowClick={handleRowClick}
-          sx={{
-            height: '80%',
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: '#0288D1',
-              color: '#FFFFFF',
-              fontWeight: 'bold',
-            },
-            '& .MuiDataGrid-columnHeaderTitle': {
-              color: '#1976D2',
-              fontWeight: 'bold',
-            },
-            '& .MuiDataGrid-cell': {
-              backgroundColor: '#FFFFFF',
-              color: '#0288D1',
-            },
-            '& .MuiDataGrid-footerContainer': {
-              backgroundColor: '#0288D1',
-              color: '#FFFFFF',
-            },
-            border: '1px solid #0288D1',
-            borderRadius: 2,
-          }}
-        />
+  rows={filteredPatients}
+  columns={columns}
+  pageSize={5}
+  rowsPerPageOptions={[5]}
+  disableSelectionOnClick
+  autoHeight
+  onRowClick={handleRowClick}
+  sx={{ boxShadow: 2, border: 'none', borderRadius: 2 }}
+/>
 
-        {/* Dialog for displaying patient details */}
+        {/* Patient Details */}
         <Dialog open={detailsOpen} onClose={handleClose} maxWidth="md" fullWidth>
-          {selectedPatient && (
-            <>
-              <DialogTitle>{selectedPatient.name}'s Details</DialogTitle>
-              <DialogContent>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  Medicines Prescribed
-                </Typography>
-                <Typography>
-                  {patientDetails[selectedPatient.id].medicines.length > 0
-                    ? patientDetails[selectedPatient.id].medicines.join(', ')
-                    : 'No medicines prescribed.'}
-                </Typography>
+          <DialogTitle>{selectedPatient?.name}'s Details</DialogTitle>
+          <DialogContent>
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">Visits</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Date</TableCell>
+                      <TableCell>Problem</TableCell>
+                      <TableCell>Bill</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {patientDetails[selectedPatient?.id]?.visits?.map((visit, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{visit.date}</TableCell>
+                        <TableCell>{visit.problem}</TableCell>
+                        <TableCell>{visit.bill}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </AccordionDetails>
+            </Accordion>
 
-                <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-                  Prescription
-                </Typography>
-                <Typography>{patientDetails[selectedPatient.id].prescription || 'No prescription.'}</Typography>
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">Prescriptions</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography><strong>Medicines:</strong> {patientDetails[selectedPatient?.id]?.medicines.join(', ')}</Typography>
+                <Typography><strong>Prescription:</strong> {patientDetails[selectedPatient?.id]?.prescription}</Typography>
+              </AccordionDetails>
+            </Accordion>
 
-                <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-                  Visit History
-                </Typography>
-                {patientDetails[selectedPatient.id].visits.length > 0 ? (
-                  patientDetails[selectedPatient.id].visits.map((visit, index) => (
-                    <Accordion key={index}>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>{`Visit on ${visit.date}`}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Typography><strong>Problem:</strong> {visit.problem}</Typography>
-                        <Typography><strong>Bill Paid:</strong> {visit.bill} Tsh</Typography>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))
-                ) : (
-                  <Typography>No visit history available.</Typography>
-                )}
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">Test Reports</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Button variant="contained" color="primary" onClick={handleTestReportOpen}>
+                  View Test Reports
+                </Button>
+              </AccordionDetails>
+            </Accordion>
 
-                <Typography variant="h6" sx={{ mt: 3 }}>
-                  Next Appointment: {selectedPatient.nextAppointment}
-                </Typography>
-
-                {/* Add new visit */}
-                <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-                  Add New Visit
-                </Typography>
+            {/* Add Visit */}
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">Add Visit</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
                 <TextField
-                  margin="dense"
-                  label="Visit Date"
+                  label="Date"
                   type="date"
-                  fullWidth
-                  variant="standard"
                   value={newVisit.date}
                   onChange={(e) => setNewVisit({ ...newVisit, date: e.target.value })}
+                  fullWidth
+                  sx={{ mb: 2 }}
                 />
                 <TextField
-                  margin="dense"
                   label="Problem"
-                  type="text"
-                  fullWidth
-                  variant="standard"
                   value={newVisit.problem}
                   onChange={(e) => setNewVisit({ ...newVisit, problem: e.target.value })}
+                  fullWidth
+                  sx={{ mb: 2 }}
                 />
                 <TextField
-                  margin="dense"
                   label="Bill"
-                  type="number"
-                  fullWidth
-                  variant="standard"
                   value={newVisit.bill}
                   onChange={(e) => setNewVisit({ ...newVisit, bill: e.target.value })}
+                  fullWidth
+                  sx={{ mb: 2 }}
                 />
-                <Button onClick={handleAddVisit} sx={{ mt: 2, backgroundColor: '#4CAF50', color: '#FFFFFF' }}>
+                <Button variant="contained" onClick={handleAddVisit} fullWidth>
                   Add Visit
                 </Button>
+              </AccordionDetails>
+            </Accordion>
 
-                {/* Add new prescription */}
-                <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-                  Add New Prescription
-                </Typography>
+            {/* Add Prescription */}
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">Add Prescription</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
                 <TextField
-                  margin="dense"
-                  label="Medicines (comma-separated)"
-                  type="text"
-                  fullWidth
-                  variant="standard"
+                  label="Medicines (comma separated)"
                   value={newPrescription.medicines}
                   onChange={(e) => setNewPrescription({ ...newPrescription, medicines: e.target.value })}
+                  fullWidth
+                  sx={{ mb: 2 }}
                 />
                 <TextField
-                  margin="dense"
                   label="Prescription"
-                  type="text"
-                  fullWidth
-                  variant="standard"
                   value={newPrescription.prescription}
                   onChange={(e) => setNewPrescription({ ...newPrescription, prescription: e.target.value })}
+                  fullWidth
+                  sx={{ mb: 2 }}
                 />
-                <Button onClick={handleAddPrescription} sx={{ mt: 2, backgroundColor: '#4CAF50', color: '#FFFFFF' }}>
+                <Button variant="contained" onClick={handleAddPrescription} fullWidth>
                   Add Prescription
                 </Button>
-              </DialogContent>
-            </>
-          )}
+              </AccordionDetails>
+            </Accordion>
+          </DialogContent>
         </Dialog>
 
-        {/* Dialog for adding a new patient */}
-        <Dialog open={addPatientOpen} onClose={handleAddPatientClose}>
-          <DialogTitle>Add New Patient</DialogTitle>
+        {/* Add Patient Dialog */}
+        <Dialog open={addPatientOpen} onClose={handleAddPatientClose} maxWidth="md" fullWidth>
+          <DialogTitle>Add Patient</DialogTitle>
           <DialogContent>
             <TextField
-              autoFocus
-              margin="dense"
-              label="Patient Name"
-              type="text"
-              fullWidth
-              variant="standard"
+              label="Name"
               value={newPatient.name}
               onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-            />
-            <TextField
-              margin="dense"
-              label="Gender"
-              type="text"
               fullWidth
-              variant="standard"
-              value={newPatient.gender}
-              onChange={(e) => setNewPatient({ ...newPatient, gender: e.target.value })}
+              sx={{ mb: 2 }}
             />
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <Select
+                value={newPatient.gender}
+                onChange={(e) => setNewPatient({ ...newPatient, gender: e.target.value })}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Gender
+                </MenuItem>
+                <MenuItem value="Male">Male</MenuItem>
+                <MenuItem value="Female">Female</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </Select>
+            </FormControl>
             <TextField
-              margin="dense"
-              label="Age"
-              type="number"
+              label="Date of Birth"
+              type="date"
+              value={newPatient.dob}
+              onChange={(e) => setNewPatient({ ...newPatient, dob: e.target.value })}
               fullWidth
-              variant="standard"
-              value={newPatient.age}
-              onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
+              sx={{ mb: 2 }}
             />
             <TextField
-              margin="dense"
+              label="Phone Number"
+              value={newPatient.phoneNumber}
+              onChange={(e) => setNewPatient({ ...newPatient, phoneNumber: e.target.value })}
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <TextField
               label="Blood Group"
-              type="text"
-              fullWidth
-              variant="standard"
               value={newPatient.bloodGroup}
               onChange={(e) => setNewPatient({ ...newPatient, bloodGroup: e.target.value })}
+              fullWidth
+              sx={{ mb: 2 }}
             />
             <TextField
-              margin="dense"
               label="Next Appointment"
-              type="text"
-              fullWidth
-              variant="standard"
+              type="date"
               value={newPatient.nextAppointment}
               onChange={(e) => setNewPatient({ ...newPatient, nextAppointment: e.target.value })}
+              fullWidth
+              sx={{ mb: 2 }}
             />
+            <Button variant="contained" onClick={handleAddPatient} fullWidth>
+              Add Patient
+            </Button>
           </DialogContent>
-          <Button onClick={handleAddPatient} sx={{ color: 'blue', marginBottom: 2 }}>
-            Add Patient
-          </Button>
+        </Dialog>
+
+        {/* Test Reports Dialog */}
+        <Dialog open={testReportOpen} onClose={handleTestReportClose} maxWidth="md" fullWidth>
+          <DialogTitle>Test Reports for {selectedPatient?.name}</DialogTitle>
+          <DialogContent>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Test</TableCell>
+                  <TableCell>Result</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {patientDetails[selectedPatient?.id]?.testReports?.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell>{report.date}</TableCell>
+                    <TableCell>{report.test}</TableCell>
+                    <TableCell>{report.result}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DialogContent>
         </Dialog>
       </Box>
     </Box>
